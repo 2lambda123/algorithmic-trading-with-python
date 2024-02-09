@@ -24,6 +24,27 @@ class OptimizationResult(object):
     """Simple container class for optimization data"""
 
     def __init__(self, parameters: Parameters, performance: Performance):
+        """Initializes an object with the given parameters and performance metrics.
+        Parameters:
+            - parameters (dict): Dictionary of parameters used for the model.
+            - performance (dict): Dictionary of performance metrics for the model.
+        Returns:
+            - None: Does not return anything.
+        Processing Logic:
+            - Check for collisions between parameter names and performance metric names.
+            - Store the parameters and performance metrics in the object.
+            - Assert that the length of the intersection between parameter names and performance metric names is 0.
+            - Use assert statement to raise an error if there are any collisions.
+            - NEVER write more than 4 bullets
+        Example:
+            >>> parameters = {'learning_rate': 0.01, 'batch_size': 32}
+            >>> performance = {'accuracy': 0.85, 'loss': 0.4}
+            >>> model = __init__(parameters, performance)
+            >>> model.parameters
+            {'learning_rate': 0.01, 'batch_size': 32}
+            >>> model.performance
+            {'accuracy': 0.85, 'loss': 0.4}"""
+        
 
         # Make sure no collisions between performance metrics and params
         assert len(parameters.keys() & performance.keys()) == 0, \
@@ -46,6 +67,16 @@ class GridSearchOptimizer(object):
     """
 
     def __init__(self, simulation_function: SimFunction):
+        """Initializes an instance of the class with a simulation function and sets up attributes for storing results.
+        Parameters:
+            - simulation_function (SimFunction): A simulation function that takes in parameters and returns a result.
+        Returns:
+            - None
+        Processing Logic:
+            - Initialize simulation function.
+            - Set up results list and dataframe.
+            - Set optimization finished flag to False."""
+        
 
         self.simulate = simulation_function
         self._results_list: List[OptimizationResult] = list()
@@ -54,10 +85,34 @@ class GridSearchOptimizer(object):
         self._optimization_finished = False
 
     def add_results(self, parameters: Parameters, performance: Performance):
+        """Adds a new optimization result to the list of results.
+        Parameters:
+            - parameters (Parameters): The parameters used for the optimization.
+            - performance (Performance): The performance of the optimization.
+        Returns:
+            - None: This function does not return anything.
+        Processing Logic:
+            - Create a new OptimizationResult object.
+            - Append the new result to the list.
+            - No other processing logic is performed."""
+        
         _results = OptimizationResult(parameters, performance)
         self._results_list.append(_results)
 
     def optimize(self, **optimization_ranges: SimKwargs):
+        """Optimizes simulation parameters and runs simulations for each combination of provided ranges.
+        Parameters:
+            - optimization_ranges (dict): Dictionary of simulation parameter names and their corresponding ranges.
+        Returns:
+            - None: This function does not return any value.
+        Processing Logic:
+            - Converts all iterables to lists.
+            - Counts total number of simulations.
+            - Prints simulation progress and estimated remaining time.
+            - Runs simulations for each combination of parameter ranges.
+            - Prints total number of simulations and elapsed time.
+            - Sets optimization_finished flag to True."""
+        
 
         assert optimization_ranges, 'Must provide non-empty parameters.'
 
@@ -97,11 +152,32 @@ class GridSearchOptimizer(object):
         self._optimization_finished = True
 
     def _assert_finished(self):
+        """This function checks if the optimization process has finished before accessing the method.
+        Parameters:
+            - self (object): The object instance.
+        Returns:
+            - None: This function does not return any value.
+        Processing Logic:
+            - Check if optimization is finished.
+            - Assert that optimization is finished.
+            - Raise an error if optimization is not finished.
+            - Run self.optimize before accessing method."""
+        
         assert self._optimization_finished, \
             'Run self.optimize before accessing this method.'
 
     @property
     def results(self) -> pd.DataFrame:
+        """Returns a Pandas DataFrame containing the results of the function.
+        Parameters:
+            - self (object): Instance of the class.
+        Returns:
+            - results_df (pd.DataFrame): DataFrame containing the results of the function.
+        Processing Logic:
+            - Asserts that the function has finished running.
+            - If the results DataFrame is empty, creates a new DataFrame using the results list.
+            - Sets the metric names by subtracting the parameter names from the columns of the results DataFrame."""
+        
         self._assert_finished()
         if self._results_df.empty:
 
@@ -115,6 +191,17 @@ class GridSearchOptimizer(object):
         return self._results_df
 
     def print_summary(self):
+        """Prints a summary of the statistics of the results dataframe.
+        Parameters:
+            - self (object): The object containing the results dataframe and metric names.
+        Returns:
+            - None: This function does not return anything, it only prints the summary.
+        Processing Logic:
+            - Creates a dataframe and stores it in the variable 'df'.
+            - Stores the metric names in the variable 'metric_names'.
+            - Prints the summary statistics of the dataframe using the describe() function.
+            - Transposes the dataframe using the T attribute."""
+        
         df = self.results
         metric_names = self.metric_names
 
@@ -137,11 +224,35 @@ class GridSearchOptimizer(object):
         return partial_df.sort_values(metric_name, ascending=False)
 
     def plot_1d_hist(self, x, show=True):
+        """Plots a 1-dimensional histogram of the given data and displays it if specified.
+        Parameters:
+            - x (array-like): The data to be plotted.
+            - show (bool): Whether or not to display the plot. Default is True.
+        Returns:
+            - None: This function does not return any value.
+        Processing Logic:
+            - Plot histogram using self.results.hist().
+            - If show is True, display the plot using plt.show()."""
+        
         self.results.hist(x)
         if show:
             plt.show()
 
     def plot_2d_line(self, x, y, show=True, **filter_kwargs):
+        """Plots a 2D line graph of the given x and y values from the results dataframe. Can filter the results dataframe by passing in keyword arguments.
+        Parameters:
+            - x (str): Column name for the x-axis values.
+            - y (str): Column name for the y-axis values.
+            - show (bool): Optional parameter to determine whether or not to display the plot. Default is True.
+            - **filter_kwargs (dict): Optional keyword arguments to filter the results dataframe. The key should be a column name and the value should be the desired value for that column.
+        Returns:
+            - None
+        Processing Logic:
+            - Filters the results dataframe based on the keyword arguments provided.
+            - Plots the x and y values from the filtered results dataframe.
+            - If keyword arguments were provided, adds a legend to the plot indicating the filter criteria used.
+            - If show is True, displays the plot."""
+        
         _results = self.results
         for k, v in filter_kwargs.items():
             _results = _results[getattr(_results, k) == v]
