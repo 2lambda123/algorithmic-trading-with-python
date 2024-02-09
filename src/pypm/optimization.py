@@ -70,7 +70,7 @@ class GridSearchOptimizer(object):
 
         total_time_elapsed = 0
 
-        print(f'Starting simulation ...')
+        print('Starting simulation ...')
         print(f'Simulating 1 / {n} ...', end='\r')
         for i, params in enumerate(product(*param_ranges.values())):
             if i > 0:
@@ -92,7 +92,7 @@ class GridSearchOptimizer(object):
 
         print(f'Simulated {total_simulations} / {total_simulations} ...')
         print(f'Elapsed time: {total_time_elapsed:.0f}s')
-        print(f'Done.')
+        print('Done.')
 
         self._optimization_finished = True
 
